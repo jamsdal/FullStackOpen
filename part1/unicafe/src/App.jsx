@@ -2,43 +2,27 @@ import { useState } from 'react'
 
 const Header = ({ content }) => <h1>{content}</h1>
 
-const Button = ({ onClick, text}) => <button onClick={onClick}>{text}</button>
+const Button = ({ onClick, text }) => <button onClick={onClick}>{text}</button>
 
-const Display = ({ text, amount}) => <p>{text} {amount}</p>
+const StatisticLine = ({ text, value }) => <p>{text} {value}</p>
 
-const Statistics = ({ good, neutral, bad}) => {
+const Statistics = ({ good, neutral, bad }) => {
   const total = good + bad + neutral
   if (total === 0){
     return <p>No feedback given</p>
   } else {
+    const average = (good - bad)/total
+    const positive = (good/total)*100 + "%"
     return(
       <div>
-        <Display text="Good" amount={good} />
-        <Display text="Neutral" amount={neutral} />
-        <Display text="Bad" amount={bad} />
-        <Total total={total} />
-        <Average good={good} bad={bad} total={total} />
-        <Positive good={good} total={total} />
+        <StatisticLine text="Good" value={good} />
+        <StatisticLine text="Neutral" value={neutral} />
+        <StatisticLine text="Bad" value={bad} />
+        <StatisticLine text="All" value={total} />
+        <StatisticLine text="Average" value={average} />
+        <StatisticLine text="Positive" value={positive} />
       </div>
     )
-  }
-}
-
-const Total = ({ total }) => <p>All {total}</p>
-
-const Average = ({ good, bad, total}) => {
-  if (total !== 0){
-    return <p>Average {(good - bad)/total}</p>
-  } else {
-    return <p>Average 0</p>
-  }
-}
-
-const Positive = ({ good, total}) => {
-  if (total !== 0){
-    return <p>Positive {(good/total)*100}%</p>
-  } else {
-    return <p>Positive 0</p>
   }
 }
 
