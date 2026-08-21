@@ -18,8 +18,8 @@ const App = () => {
       .then((persons) => setPersons(persons))
   }, [])
 
-  const handleMessage = (message, messageType, name) => {
-    setMessage(`${message} ${name}`)
+  const handleMessage = (message, messageType) => {
+    setMessage(message)
       setMessageType(messageType)
 
       setTimeout(() => {
@@ -54,7 +54,9 @@ const App = () => {
         personService.update(changedPerson.id, changedPerson)
           .then(updatedPerson => {
             setPersons(persons.map(person => person.id !== updatedPerson.id ? person : updatedPerson))
-            handleMessage('Updated', 'confirm', updatedPerson.name)
+            handleMessage(`Updated ${updatedPerson.name}`, 'confirm')
+          }).catch(() => {
+            handleMessage(`Information of ${changedPerson.name} has already been removed from server`, 'error')
           })
       }
       return
@@ -68,7 +70,7 @@ const App = () => {
     personService.create(personObject)
       .then(newPerson => {
         setPersons(persons.concat(newPerson))
-        handleMessage('Added', 'confirm', newPerson.name)
+        handleMessage(`Added ${newPerson.name}`, 'confirm')
       })
   }
 
