@@ -61,7 +61,7 @@ const App = () => {
   }
 
   const addPerson = (event) => {
-    event.preventDefault();
+    event.preventDefault()
 
     if (persons.find(person => person.name === newName)) {
       alert(`${newName} is already added to phonebook`)
@@ -70,11 +70,13 @@ const App = () => {
 
     const personObject = {
       name: newName,
-      number: newNumber,
-      id: persons.length + 1
+      number: newNumber
     }
 
-    setPersons(persons.concat(personObject))
+    axios.post("http://localhost:3001/persons", personObject)
+      .then(response =>{
+        setPersons(persons.concat(response.data))
+      })
   }
 
   const handleNameChange = (event) => {
