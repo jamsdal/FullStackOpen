@@ -26,19 +26,26 @@ const PersonForm = ({ onSubmit, nameValue, numberValue, nameChange, numberChange
   )
 }
 
-const Persons = ({ persons }) => {
+const Persons = ({ persons , handleDelete }) => {
   return (
     <div>
       {
         persons.map(person => (
-          <DisplayPerson key={person.id} person={person} />
+          <DisplayPerson key={person.id} person={person} handleDelete={handleDelete}/>
         ))
       }
     </div>
   )
 }
 
-const DisplayPerson = ({ person }) => <p>{person.name} {person.number}</p>
+const DisplayPerson = ({ person, handleDelete }) => {
+  return (
+    <div>
+      {person.name} {person.number}
+      <button onClick={() => handleDelete(person)}>Delete</button>
+    </div>
+  )
+}
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -55,6 +62,15 @@ const App = () => {
 
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
+  }
+
+  const handleDelete = (person) => {
+    if(window.confirm(`Are you sure you want to delete ${person.name}?`)) {
+      personService.remove(person.id)
+      .then(() => {
+        setPersons(persons.filter(p => p.id !== person.id))
+      })
+    }
   }
 
   const addPerson = (event) => {
@@ -95,7 +111,7 @@ const App = () => {
         numberChange={handleNumberChange}
       />
       <h3>Numbers</h3>
-      <Persons persons={peopleToShow} />
+      <Persons persons={peopleToShow} handleDelete={handleDelete} />
     </div>
   )
 }
