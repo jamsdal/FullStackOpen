@@ -1,62 +1,32 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
-
-const Filter = ({ value, onChange }) => {
-  return (
-    <div>
-      Filter shown with
-      <input value={value} onChange={onChange} />
-    </div>
-  )
-}
-
-const PersonForm = ({ onSubmit, nameValue, numberValue, nameChange, numberChange, }) => {
-  return (
-    <form onSubmit={onSubmit}>
-        <div>
-          Name: <input value={nameValue} onChange={nameChange}/>
-        </div>
-        <div>
-          Number: <input value={numberValue} onChange={numberChange} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-  )
-}
-
-const Persons = ({ persons , handleDelete }) => {
-  return (
-    <div>
-      {
-        persons.map(person => (
-          <DisplayPerson key={person.id} person={person} handleDelete={handleDelete}/>
-        ))
-      }
-    </div>
-  )
-}
-
-const DisplayPerson = ({ person, handleDelete }) => {
-  return (
-    <div>
-      {person.name} {person.number}
-      <button onClick={() => handleDelete(person)}>Delete</button>
-    </div>
-  )
-}
+import Persons from './components/Persons'
+import PersonForm from './components/PersonForm'
+import Filter from './components/Filter'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
+  const [messageType, setMessageType] = useState('')
 
   useEffect(() => {
     personService.getAll()
       .then((persons) => setPersons(persons))
-    }, [])
+  }, [])
+
+  const handleMessage = (message, messageType, name) => {
+    setMessage(`${message} ${name}`)
+      setMessageType(messageType)
+
+      setTimeout(() => {
+        setMessage(null)
+        setMessageType('')
+      }, 5000)
+  }
 
   const peopleToShow = persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
 
@@ -84,6 +54,7 @@ const App = () => {
         personService.update(changedPerson.id, changedPerson)
           .then(updatedPerson => {
             setPersons(persons.map(person => person.id !== updatedPerson.id ? person : updatedPerson))
+            handleMessage('Updated', 'confirm', updatedPerson.name)
           })
       }
       return
@@ -95,7 +66,10 @@ const App = () => {
     }
 
     personService.create(personObject)
-      .then(newPerson => setPersons(persons.concat(newPerson)))
+      .then(newPerson => {
+        setPersons(persons.concat(newPerson))
+        handleMessage('Added', 'confirm', newPerson.name)
+      })
   }
 
   const handleNameChange = (event) => {
@@ -109,6 +83,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} messageType={messageType} />
       <Filter value={filter} onChange={handleFilterChange} />
       <h3>Add New</h3>
       <PersonForm 

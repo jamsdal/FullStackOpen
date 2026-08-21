@@ -24,6 +24,11 @@
       "name": "John Doe",
       "number": "12345",
       "id": "F4GelxzR3Ss"
+    },
+    {
+      "name": "Johnny boy",
+      "number": "1237",
+      "id": "JNIgVnXEe-E"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
