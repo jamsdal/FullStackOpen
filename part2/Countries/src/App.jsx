@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-const Display = ({ countries, filter} ) => {
+const Display = ({ countries, filter, setFilter} ) => {
+  const handleShow = (country) => {
+    setFilter(country)
+  }
   if (countries.length > 10 && filter) {
     return (
       <div>
@@ -11,7 +14,7 @@ const Display = ({ countries, filter} ) => {
   } else if (countries.length <= 10 && countries.length > 1) {
     return (
       <div>
-        {countries.map(country => <p key={country}>{country}</p>)}
+        {countries.map(country => <div key={country}>{country}<button onClick={() => handleShow(country)}>show</button></div>)}
       </div>
     )
   } else if (countries.length === 1) {
@@ -76,13 +79,12 @@ const App = () => {
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
   }
-
   
 
   return (
     <div>
         Find Countries: <input value={filter} onChange={handleFilterChange} />
-        <Display countries={countriesToShow} filter={filter} />
+        <Display countries={countriesToShow} filter={filter} setFilter={setFilter} />
     </div>
   )
 }
