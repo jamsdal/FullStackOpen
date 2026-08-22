@@ -21,26 +21,26 @@ const Display = ({ countries, filter, setFilter} ) => {
     const country = countries[0]
     return (
       <div>
-        <DisplayCountry key={country} country={country}/>
+        <DisplayCountry country={country}/>
       </div>
     )
   }
 }
 
 const DisplayCountry = ({ country }) => {
-  const [countryData, setCountryData] = useState([])
-  
+  const [countryData, setCountryData] = useState(null)
+
   useEffect(()=> {
-    async function fetchData() {
-      await axios.get(`https://studies.cs.helsinki.fi/restcountries/api/name/${country}`)
-        .then(response => {
-          setCountryData(response.data)
-        })
+    function fetchData() {
+     axios.get(`https://studies.cs.helsinki.fi/restcountries/api/name/${country}`)
+      .then(response => {
+        setCountryData(response.data)
+      })
     }
     fetchData()
   },[country])
 
-  if (countryData.length !== 0){
+  if (countryData){
     
     return (
     <div>
@@ -57,9 +57,34 @@ const DisplayCountry = ({ country }) => {
       <h2>Flag</h2>
 
       <img alt={countryData.flags.alt} src={countryData.flags.png} />
+      <DisplayWeather country={countryData} />
     </div>)
   }
 
+  return <div></div>
+}
+
+const DisplayWeather = ({ country }) => {
+  const [temp, setTemp] = useState(null)
+  
+  useEffect(()=> {
+    function fetchData() {
+     axios.get(`https://api.open-meteo.com/v1/forecast?latitude=${country.capitalInfo.latlng[0]}&longitude=${country.capitalInfo.latlng[1]}&current=temperature_2m,wind_speed_10m`)
+      .then(response => {
+        setTemp(response.data)
+      })
+    }
+    fetchData()
+  },[country])
+
+  if (temp)
+    return (
+      <div>
+        <h2>Weather in {country.capital[0]}</h2>
+        <p>Temperature {temp.current.temperature_2m}{temp.current_units.temperature_2m} </p>
+        <p>Wind Speed {temp.current.wind_speed_10m} {temp.current_units.wind_speed_10m}</p>
+      </div>
+    )
   return <div></div>
 }
 
