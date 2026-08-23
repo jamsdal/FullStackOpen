@@ -49,10 +49,17 @@ app.get('/api/persons/:id', (request, response) => {
     const person = phonebook.find(person => person.id === id)
 
     if (person) {
-        return response.json(person)
+        response.json(person)
     } else {
-        return response.status(404).end()
+        response.status(404).end()
     }
+})
+
+app.delete('/api/persons/:id', (request, response) => {
+    const id = request.params.id
+    phonebook = phonebook.filter(person => person.id !== id)
+
+    response.status(204).end()
 })
 
 
