@@ -32,10 +32,6 @@ app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 app.use(express.static('dist'))
 
-app.get('/', (request, response) => {
-  response.send('<h1>Hello World!</h1>')
-})
-
 app.get('/api/persons', (request, response) =>{
     response.json(phonebook)
 })
@@ -100,5 +96,5 @@ app.post('/api/persons', (request, response) => {
 })
 
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, ()=>console.log(`Server running on port ${PORT}`))
