@@ -72,6 +72,10 @@ const App = () => {
         setPersons(persons.concat(newPerson))
         handleMessage(`Added ${newPerson.name}`, 'confirm')
       })
+      .catch(error => {
+        console.log(error.response.data.error)
+        handleMessage(error.response.data.error, "error")
+      })
   }
 
   const handleNameChange = (event) => {
