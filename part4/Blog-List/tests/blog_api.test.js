@@ -5,20 +5,35 @@ const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const api = supertest(app)
+
+let token = ''
 
 describe('When there are blogs initially saved', () => {
   beforeEach(async () => {
     await Blog.deleteMany()
     await Blog.insertMany(helper.initialBlogs)
+
+    await User.deleteMany()
+    await User.insertOne(helper.testUser)
+
+    const result = await api
+      .post('/api/login')
+      .send({
+        username: helper.testUser.username,
+        password: helper.testUserPassword
+      })
+
+    token = `Bearer ${result.body.token}`
   })
 
   test('blogs are returned as json', async () => {
     await api
-    .get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
   })
 
   test('all blogs are returned', async () => {
@@ -34,9 +49,10 @@ describe('When there are blogs initially saved', () => {
 
   describe('Addition of a new blog', () => {
     test('a new blog can be added', async () => {
-      const newBlog = { title: 'Add new', author: 'James Daley', url: 'example.com', likes: 10}
+      const newBlog = { title: 'Add new', author: 'James Daley', url: 'example.com', likes: 10 }
       await api
         .post('/api/blogs')
+        .set('Authorization', token)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -50,6 +66,7 @@ describe('When there are blogs initially saved', () => {
 
       const response = await api
         .post('/api/blogs')
+        .set('Authorization', token)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -58,21 +75,37 @@ describe('When there are blogs initially saved', () => {
     })
 
     test('returns status 400 Bad Request if missing title', async () => {
-      const newBlog = { author: 'James Daley', url: 'example.com', likes: 10}
+      const newBlog = { author: 'James Daley', url: 'example.com', likes: 10 }
 
       await api
         .post('/api/blogs')
+        .set('Authorization', token)
         .send(newBlog)
         .expect(400)
     })
 
     test('returns status 400 Bad Request if missing url', async () => {
-      const newBlog = { title:"Add new", author: 'James Daley', likes: 10}
+      const newBlog = { title:'Add new', author: 'James Daley', likes: 10 }
+
+      await api
+        .post('/api/blogs')
+        .set('Authorization', token)
+        .send(newBlog)
+        .expect(400)
+    })
+
+    test('fails with status 401 if token is not provided', async () => {
+      const newBlog = {
+        title: 'Add new',
+        author: 'James Daley',
+        url: 'example.com',
+        likes: 10
+      }
 
       await api
         .post('/api/blogs')
         .send(newBlog)
-        .expect(400)
+        .expect(401)
     })
   })
 
@@ -81,7 +114,10 @@ describe('When there are blogs initially saved', () => {
       const blogsAtBeginning = await helper.blogsInDb()
       const blogToDelete = blogsAtBeginning[0]
 
-      await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set('Authorization', token)
+        .expect(204)
 
       const blogsAtEnd = await helper.blogsInDb()
 
@@ -102,6 +138,7 @@ describe('When there are blogs initially saved', () => {
 
       await api
         .put(`/api/blogs/${blogToUpdate.id}`)
+        .set('Authorization', token)
         .send(blogToUpdate)
         .expect(200)
         .expect('Content-Type', /application\/json/)
